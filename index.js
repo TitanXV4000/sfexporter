@@ -36,20 +36,6 @@ if (process.env.NODE_ENV !== 'production') {
   }));
 }
 
-/* q to quit */
-// const readline = require('readline');
-// readline.emitKeypressEvents(process.stdin);
-// process.stdin.setRawMode(true);
-// process.stdin.on('keypress', (str, key) => {
-//   if (key.ctrl && key.name === 'c') {
-//     process.exit();
-//   } else if (key.name === 'q') {
-//     console.log("Process is exiting. Please wait...");
-//     finished = true;
-//   } 
-// });
-// console.log('Press q to quit.');
-
 (async () => {
   /* Initiate the Puppeteer browser */
   const browser = await puppeteer.launch({
