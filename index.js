@@ -43,7 +43,7 @@ if (process.env.NODE_ENV !== 'production') {
     //slowMo: 250,
     defaultViewport: null,
     args: [`--window-size=1600,1200`],
-    executablePath: '/usr/bin/chromium-browser'
+    executablePath: '/usr/bin/chromium'
   });
   logger.debug("Browser loaded.");
 
