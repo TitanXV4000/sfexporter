@@ -41,8 +41,8 @@ if (process.env.NODE_ENV !== 'production') {
   const browser = await puppeteer.launch({
     //headless: false,
     //slowMo: 250,
-    defaultViewport: null,
-    args: [`--window-size=1600,1200`, '--no-sandbox'],
+    //defaultViewport: null,
+    args: ['--no-sandbox'], // necessary to work with puppeteer docker image
   });
   logger.debug("Browser loaded.");
 
@@ -82,10 +82,9 @@ if (process.env.NODE_ENV !== 'production') {
   try {
     do {
       await sleep(10000);
-      await pressKey(page, 'Tab', 23); // originally works with 22, but sometimes its 23
-      await pressKey(page, 'Enter');
+      await page.mouse.click(755, 170);
       await sleep(1000); // wait for menu to open
-      await pressKey(page, 'ArrowDown', 4);
+      await pressKey(page, 'ArrowDown', 5);
       await pressKey(page, 'Enter');
       await sleep(5000); // wait for ui element to load
       await pressKey(page, 'ArrowRight');
