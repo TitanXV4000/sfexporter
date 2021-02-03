@@ -9,7 +9,7 @@
   "author": "jwalker",
   "license": "ISC",
   "dependencies": {
-    "puppeteer": "^5.5.0",
-    "winston": "^3.3.3"
+    "jwalker-logger": "0.0.1",
+    "puppeteer": "^5.5.0"
   }
 }

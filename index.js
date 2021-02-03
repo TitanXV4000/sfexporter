@@ -5,36 +5,9 @@ jwalker
 */
 var config = require('./config');
 const puppeteer = require('puppeteer');
-const winston = require('winston');
-const { createLogger, format, transports } = require('winston');
-const { combine, timestamp, label, printf } = format;
+const jwalkerLogger = require('jwalker-logger');
 
-const myFormat = printf(({ level, message, label, timestamp }) => {
-  return `${timestamp} [${label}] ${level}: ${message}`;
-});
-
-const logger = winston.createLogger({
-  level: config.LOG_LEVEL,
-  format: combine(
-    label({ label: 'sfexporter' }),
-    timestamp(),
-    myFormat
-  ),
-  defaultMeta: { service: 'user-service' },
-  transports: [
-    // - Write all logs with level `error` and below to `error.log`
-    // - Write all logs with level `info` and below to `combined.log`
-    new winston.transports.File({ filename: 'error.log', level: 'error' }),
-    new winston.transports.File({ filename: 'combined.log' }),
-  ],
-  exitOnError: false,
-});
-
-if (process.env.NODE_ENV !== 'production') {
-  logger.add(new winston.transports.Console({
-    format: winston.format.simple(),
-  }));
-}
+const logger = jwalkerLogger.newLogger();
 
 (async () => {
   /* Initiate the Puppeteer browser */

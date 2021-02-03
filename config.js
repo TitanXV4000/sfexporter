@@ -4,3 +4,5 @@ exports.PASS = process.env.PASS || '';
 exports.DOWNLOAD_PATH = process.env.DOWNLOAD_PATH || '/sfexports';
 exports.NODE_ENV = process.env.NODE_ENV || 'dev';
 exports.LOG_LEVEL = process.env.LOG_LEVEL || 'debug';
+exports.SERVICE_NAME = process.env.SERVICE_NAME || 'sfexporter';
+exports.TIMEZONE = process.env.TIMEZONE || 'America/Denver';
