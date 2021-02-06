@@ -12,9 +12,9 @@ const logger = jwalkerLogger.newLogger();
 (async () => {
   /* Initiate the Puppeteer browser */
   const browser = await puppeteer.launch({
-    //headless: false,
-    //slowMo: 250,
-    //defaultViewport: null,
+    // headless: false,
+    // slowMo: 250,
+    // defaultViewport: null,
     args: ['--no-sandbox'], // necessary to work with puppeteer docker image
   });
   logger.debug("Browser loaded.");
@@ -62,6 +62,7 @@ const logger = jwalkerLogger.newLogger();
       await sleep(5000); // wait for ui element to load
       await pressKey(page, 'ArrowRight');
       await pressKey(page, 'Tab');
+      await pressKey(page, 'ArrowDown');
       await pressKey(page, 'ArrowDown');
       await pressKey(page, 'Tab', 3);
       await pressKey(page, 'Enter');
