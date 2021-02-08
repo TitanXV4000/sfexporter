@@ -12,12 +12,14 @@ const fsPromises = fs.promises;
 const path = require('path');
 
 const logger = jwalkerLogger.newLogger();
+logger.info("Starting up.");
 
 const tempDownloadPath = `${config.DOWNLOAD_PATH}/temp`;
 
 //var downloading = false;
 var downloadFinished = false;
 var fileMoved = false;
+
 
 (async () => {
   /* Create temp download directory */
@@ -42,7 +44,8 @@ var fileMoved = false;
       downloadFinished = true;
       
       try {
-        await moveFile(`${tempDownloadPath}/${basename}`, `${config.DOWNLOAD_PATH}/${basename}`);
+        await moveFile(`${tempDownloadPath}/${basename}`,
+                       `${config.DOWNLOAD_PATH}/${config.REPORT_TAG}_${basename}`);
       } catch (e) {
         logger.error(e);
         process.exit(5);
@@ -123,7 +126,7 @@ var fileMoved = false;
       await page.reload();
 
       logger.debug("Reloaded. Sleeping...");
-      await sleep (40000);
+      await sleep (config.REPORT_INTERVAL);
     } while (!finished);
   } catch (err) {
     finished = true;
@@ -134,6 +137,7 @@ var fileMoved = false;
     process.exit();
   }
 })();
+
 
 /* Works with the chokidar watcher to wait for the file download to complete */
 async function waitForDownload(timeout = 60000 /* ms */) {
@@ -154,6 +158,7 @@ async function waitForDownload(timeout = 60000 /* ms */) {
   } while (!complete);
 }
 
+
 /* Presses the key x times */
 async function pressKey(page, key, presses = 1) {
   if (presses == 1) {
@@ -166,6 +171,7 @@ async function pressKey(page, key, presses = 1) {
   }
 }
 
+
 async function makeTempDir() {
   try {
     await fsPromises.mkdir(tempDownloadPath);
@@ -173,6 +179,7 @@ async function makeTempDir() {
     if (e.errno != -17) throw e; // -17 file already exists
   }
 }
+
 
 async function moveFile(oldname, newname) {
   logger.debug(`Moving file ${oldname} to ${newname}`);
@@ -185,6 +192,7 @@ async function moveFile(oldname, newname) {
     throw e;
   }
 }
+
 
 /* Use if 500ms timeout of 'networkidleX' is insufficient */
 function waitForNetworkIdle(page, timeout, maxInflightRequests = 0) {
@@ -219,6 +227,7 @@ function waitForNetworkIdle(page, timeout, maxInflightRequests = 0) {
       timeoutId = setTimeout(onTimeoutDone, timeout);
   }
 }
+
 
 /* They promised me this would not be needed... */
 function sleep(ms) {
