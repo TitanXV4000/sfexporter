@@ -6,5 +6,5 @@ exports.NODE_ENV = process.env.NODE_ENV || 'dev';
 exports.LOG_LEVEL = process.env.LOG_LEVEL || 'debug';
 exports.SERVICE_NAME = process.env.SERVICE_NAME || 'sfexporter';
 exports.TIMEZONE = process.env.TIMEZONE || 'America/Denver';
-exports.REPORT_INTERVAL = process.env.REPORT_INTERVAL || '40000';
+exports.REPORT_INTERVAL = process.env.REPORT_INTERVAL || '40000'; // ms
 exports.REPORT_TAG = process.env.REPORT_TAG || 'open'; // used by sfreportparser to designate collection

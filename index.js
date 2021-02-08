@@ -14,7 +14,7 @@ const path = require('path');
 const logger = jwalkerLogger.newLogger();
 logger.info("Starting up.");
 
-const tempDownloadPath = `${config.DOWNLOAD_PATH}/temp`;
+const tempDownloadPath = `${config.DOWNLOAD_PATH}/${config.REPORT_TAG}`;
 
 //var downloading = false;
 var downloadFinished = false;
