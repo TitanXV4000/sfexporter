@@ -11,7 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "chokidar": "^3.5.1",
-    "jwalker-logger": "0.0.1",
+    "jwalker-logger": "0.0.2",
     "puppeteer": "^5.5.0",
     "winston-daily-rotate-file": "^4.5.0"
   }
