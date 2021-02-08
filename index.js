@@ -6,10 +6,50 @@ jwalker
 var config = require('./config');
 const puppeteer = require('puppeteer');
 const jwalkerLogger = require('jwalker-logger');
+const chokidar = require('chokidar');
+const fs = require('fs');
+const fsPromises = fs.promises;
+const path = require('path');
 
 const logger = jwalkerLogger.newLogger();
 
+const tempDownloadPath = `${config.DOWNLOAD_PATH}/temp`;
+
+//var downloading = false;
+var downloadFinished = false;
+var fileMoved = false;
+
 (async () => {
+  /* Create temp download directory */
+  try {
+    await makeTempDir();
+  } catch (e) {
+    logger.error(e);
+    logger.error('Error unrecoverable. Exiting...');
+    process.exit(5);
+  }
+
+  /* Create filesystem listener to watch download progress */
+  const watcher = chokidar.watch(tempDownloadPath, {ignored: /\.csv$/g, persistent: true});
+  watcher
+    .on('add', function(filePath)  {
+      logger.debug('Download of file ' + filePath + ' has begun.');
+    })
+    //.on('change', function(filePath)  { logger.debug('File ' + filePath + ' has been changed.'); })
+    .on('unlink', async function(filePath)  {
+      let basename = path.basename(filePath, '.crdownload');
+      logger.debug('File has finished downloading: ' + basename);
+      downloadFinished = true;
+      
+      try {
+        await moveFile(`${tempDownloadPath}/${basename}`, `${config.DOWNLOAD_PATH}/${basename}`);
+      } catch (e) {
+        logger.error(e);
+        process.exit(5);
+      }
+    })
+    .on('error', function(error) { logger.error('Error happened: ' + error); });
+
   /* Initiate the Puppeteer browser */
   const browser = await puppeteer.launch({
     // headless: false,
@@ -42,39 +82,48 @@ const logger = jwalkerLogger.newLogger();
     await page.type('#password', config.PASS),
     await page.keyboard.press('Enter'),
     logger.info("Logged in to Salesforce. Please wait..."),
-    await sleep(45000),
-    waitForNetworkIdle(page, 1000, 0),
+    await sleep(28000),
+    waitForNetworkIdle(page, 2000, 0),
     logger.debug("Salesforce report page loaded."),
   ]);
 
   /* Set download location */
-  await page._client.send('Page.setDownloadBehavior', {behavior: 'allow', downloadPath: config.DOWNLOAD_PATH});
+  await page._client.send('Page.setDownloadBehavior', {behavior: 'allow', downloadPath: tempDownloadPath});
 
   /* Traverse the page with key presses to download the report */
   var finished = false;
   try {
+    // Click the "Export Details" button. Only needs to happen once.
+    await page.evaluate(() => {
+      document.querySelector("#report > div.bFilterReport > div.reportActions > input:nth-child(8)")
+        .click();
+    });
+    logger.silly("Clicked \"Export Details\" button.");
+    await sleep(5000);
+
     do {
-      await sleep(10000);
-      await page.mouse.click(755, 170);
-      await sleep(1000); // wait for menu to open
-      await pressKey(page, 'ArrowDown', 5);
-      await pressKey(page, 'Enter');
-      await sleep(5000); // wait for ui element to load
-      await pressKey(page, 'ArrowRight');
-      await pressKey(page, 'Tab');
-      await pressKey(page, 'ArrowDown');
-      await pressKey(page, 'ArrowDown');
-      await pressKey(page, 'Tab', 3);
-      await pressKey(page, 'Enter');
+      // Change report type to csv
+      await pressKey(page, 'Tab', 4);
+      await pressKey(page, 'ArrowUp');
+      logger.silly("Pressed [TAB TAB ARROWUP] keys.");
+      
+      // Click the "Export" button to begin download. 
+      // It seems to take around 20 seconds for the download to complete once the export button is clicked.
+      await page.evaluate(() => {
+        document.querySelector("#bottomButtonRow > input:nth-child(1)")
+          .click();
+      });
+      logger.silly("Clicked \"Export\" button.");
 
-      /* TODO verify file was downloaded */
-      logger.info("Report downloaded.");
+      /* Verify file was downloaded */
+      logger.debug("Waiting for download to start...");
+      await waitForDownload();
+
       logger.debug("Reloading page.");
-
-      await sleep(10000);
       await page.reload();
+
       logger.debug("Reloaded. Sleeping...");
-      await sleep (46000);
+      await sleep (40000);
     } while (!finished);
   } catch (err) {
     finished = true;
@@ -86,6 +135,24 @@ const logger = jwalkerLogger.newLogger();
   }
 })();
 
+/* Works with the chokidar watcher to wait for the file download to complete */
+async function waitForDownload(timeout = 60000 /* ms */) {
+  var complete = false;
+  var elapsedTime = 0;
+  do {
+    if (downloadFinished && fileMoved) {
+      logger.debug("File download completed and moved to non-temp directory.");
+      downloadFinished = false;
+      fileMoved = false;
+      complete = true;
+    } else {
+      if (elapsedTime >= timeout) throw new Error("Download timeout reached.");
+      logger.silly("Still waiting for download to complete. Time elapsed: " + elapsedTime / 1000 + " seconds.");
+      elapsedTime += 1000;
+      await sleep(1000);
+    }
+  } while (!complete);
+}
 
 /* Presses the key x times */
 async function pressKey(page, key, presses = 1) {
@@ -99,6 +166,25 @@ async function pressKey(page, key, presses = 1) {
   }
 }
 
+async function makeTempDir() {
+  try {
+    await fsPromises.mkdir(tempDownloadPath);
+  } catch (e) {
+    if (e.errno != -17) throw e; // -17 file already exists
+  }
+}
+
+async function moveFile(oldname, newname) {
+  logger.debug(`Moving file ${oldname} to ${newname}`);
+  try {
+    await fsPromises.rename(oldname, newname);
+    logger.debug('File move complete.');
+    fileMoved = true;
+  } catch (e) { 
+    logger.error('Throwing error from moveFile()');
+    throw e;
+  }
+}
 
 /* Use if 500ms timeout of 'networkidleX' is insufficient */
 function waitForNetworkIdle(page, timeout, maxInflightRequests = 0) {
@@ -133,7 +219,6 @@ function waitForNetworkIdle(page, timeout, maxInflightRequests = 0) {
       timeoutId = setTimeout(onTimeoutDone, timeout);
   }
 }
-
 
 /* They promised me this would not be needed... */
 function sleep(ms) {
