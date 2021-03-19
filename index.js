@@ -120,7 +120,7 @@ var fileMoved = false;
 
       /* Verify file was downloaded */
       logger.debug("Waiting for download to start...");
-      await waitForDownload();
+      await waitForDownload(config.DOWNLOAD_TIMEOUT);
 
       logger.debug("Reloading page.");
       await page.reload();
