@@ -53,6 +53,8 @@ var fileMoved = false;
     })
     .on('error', function(error) { logger.error('Error happened: ' + error); });
 
+  try {
+
   /* Initiate the Puppeteer browser */
   const browser = await puppeteer.launch({
     // headless: false,
@@ -74,8 +76,10 @@ var fileMoved = false;
 
   /* Click on the SSO button */
   await Promise.all([
-    page.click('#idp_section_buttons > button > span'),
-    waitForNetworkIdle(page, 2000, 0),
+    await sleep(10000),
+    await page.click('#idp_section_buttons > button > span'),
+    await page.keyboard.press('Enter'),
+    waitForNetworkIdle(page, 20000, 0),
     logger.debug("Navigating to SSO page."),
   ]);
 
@@ -95,7 +99,7 @@ var fileMoved = false;
 
   /* Traverse the page with key presses to download the report */
   var finished = false;
-  try {
+  //try {
     // Click the "Export Details" button. Only needs to happen once.
     await page.evaluate(() => {
       document.querySelector("#report > div.bFilterReport > div.reportActions > input:nth-child(8)")
@@ -132,7 +136,9 @@ var fileMoved = false;
     finished = true;
     logger.error("Error caught during export procedure: " + err);
   } finally {
-    await browser.close();
+    if (browser !== null ) {
+      await browser.close();
+    }
     logger.info("Browser closed. Exiting.");
     process.exit();
   }
