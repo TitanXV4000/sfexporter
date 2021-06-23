@@ -136,11 +136,16 @@ var fileMoved = false;
     finished = true;
     logger.error("Error caught during export procedure: " + err);
   } finally {
-    if (browser !== null ) {
-      await browser.close();
+    try {
+      if (browser !== null ) {
+        await browser.close();
+      }
+      logger.info("Browser closed. Exiting.");
+    } catch (err) {
+      logger.error("Error caught during browser.close(): " + err);
+    } finally {
+      process.exit();
     }
-    logger.info("Browser closed. Exiting.");
-    process.exit();
   }
 })();
 
