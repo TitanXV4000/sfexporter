@@ -3,7 +3,7 @@ WORKDIR /usr/src/apps
 RUN apt-get update
 RUN apt-get -y install git
 RUN mkdir /sfexports
-RUN git clone https://github.com/johndwalker/sfexporter.git
+RUN git clone https://github.com/TitanXV4000/sfexporter.git
 WORKDIR /usr/src/apps/sfexporter
 RUN npm install
 # If you are building your code for production
