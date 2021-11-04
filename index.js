@@ -129,7 +129,7 @@ var fileMoved = false;
       logger.debug("Reloading page.");
       await page.reload();
 
-      logger.debug("Reloaded. Sleeping...");
+      logger.debug("Reloaded. Sleeping... " + config.REPORT_INTERVAL + "ms");
       await sleep (config.REPORT_INTERVAL);
     } while (!finished);
   } catch (err) {
