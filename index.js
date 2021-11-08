@@ -5,7 +5,7 @@ jwalker
 */
 var config = require('./config');
 const puppeteer = require('puppeteer');
-const jwalkerLogger = require('jwalker-logger');
+const jwalkerLogger = require('tsanford-logger');
 const chokidar = require('chokidar');
 const fs = require('fs');
 const fsPromises = fs.promises;
