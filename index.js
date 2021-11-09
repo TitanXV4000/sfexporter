@@ -4,6 +4,7 @@ grabs an export of the specified report in csv format once per minute
 jwalker
 */
 var config = require('./config');
+var reportCount = 0;
 const puppeteer = require('puppeteer');
 const jwalkerLogger = require('tsanford-logger');
 const chokidar = require('chokidar');
@@ -129,7 +130,7 @@ var fileMoved = false;
       logger.debug("Reloading page.");
       await page.reload();
 
-      logger.debug("Reloaded. Sleeping... " + config.REPORT_INTERVAL + "ms");
+      logger.debug("Reloaded. Sleeping for " + config.REPORT_INTERVAL + "ms... Count=" + reportCount);
       await sleep (config.REPORT_INTERVAL);
     } while (!finished);
   } catch (err) {
@@ -160,6 +161,7 @@ async function waitForDownload(timeout = 60000 /* ms */) {
       downloadFinished = false;
       fileMoved = false;
       complete = true;
+      reportCount++;
     } else {
       if (elapsedTime >= timeout) throw new Error("Download timeout reached.");
       logger.silly("Still waiting for download to complete. Time elapsed: " + elapsedTime / 1000 + " seconds.");
