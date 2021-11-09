@@ -45,6 +45,13 @@ var fileMoved = false;
       downloadFinished = true;
       
       try {
+        await copyFile(`${tempDownloadPath}/${basename}`,
+                       `${tempDownloadPath}/${config.REPORT_TAG}_last.csv`);
+      } catch (e) {
+        logger.error(e);
+      }
+
+      try {
         await moveFile(`${tempDownloadPath}/${basename}`,
                        `${config.DOWNLOAD_PATH}/${config.REPORT_TAG}_${basename}`);
       } catch (e) {
@@ -203,6 +210,19 @@ async function moveFile(oldname, newname) {
     fileMoved = true;
   } catch (e) { 
     logger.error('Throwing error from moveFile()');
+    throw e;
+  }
+}
+
+
+async function copyFile(oldname, newname) {
+  logger.debug(`Copying file ${oldname} to ${newname}`);
+  try {
+    await fsPromises.copyFile(oldname, newname);
+    logger.debug('File copy complete.');
+    fileCopied = true;
+  } catch (e) { 
+    logger.error('Throwing error from copyFile()');
     throw e;
   }
 }
