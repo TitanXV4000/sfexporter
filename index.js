@@ -110,6 +110,10 @@ var fileMoved = false;
     await sleep(5000);
 
     do {
+      logger.debug("Reloading page.");
+      await page.reload();
+      logger.debug("Page reloaded.");
+
       // Change report type to csv
       await pressKey(page, 'Tab', 4);
       await pressKey(page, 'ArrowUp');
@@ -127,10 +131,7 @@ var fileMoved = false;
       logger.debug("Waiting for download to start...");
       await waitForDownload(config.DOWNLOAD_TIMEOUT);
 
-      logger.debug("Reloading page.");
-      await page.reload();
-
-      logger.debug("Reloaded. Sleeping for " + config.REPORT_INTERVAL + "ms... Count=" + reportCount);
+      logger.debug("Sleeping for " + config.REPORT_INTERVAL + "ms... Count=" + reportCount);
       await sleep (config.REPORT_INTERVAL);
     } while (!finished);
   } catch (err) {
