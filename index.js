@@ -15,6 +15,11 @@ const path = require('path');
 const logger = jwalkerLogger.newLogger();
 logger.info("Starting up.");
 
+var sleepTime = Math.floor(config.REPORT_INTERVAL / 1000);
+var sleepTimeUnit = "seconds";
+if (sleepTime > 60 ) { sleepTime = Math.floor(sleepTime / 60); sleepTimeUnit = "minutes"; }
+if (sleepTime > 60 ) { sleepTime = Math.floor(sleepTime / 60); sleepTimeUnit = "hours"; }
+
 const tempDownloadPath = `${config.DOWNLOAD_PATH}/${config.REPORT_TAG}`;
 
 //var downloading = false;
@@ -138,7 +143,7 @@ var fileMoved = false;
       logger.debug("Waiting for download to start...");
       await waitForDownload(config.DOWNLOAD_TIMEOUT);
 
-      logger.info("Sleeping for " + config.REPORT_INTERVAL + "ms... Count=" + reportCount);
+      logger.info("Sleeping for " + sleepTime + " " + sleepTimeUnit + "... Count=" + reportCount);
       await sleep (config.REPORT_INTERVAL);
     } while (!finished);
   } catch (err) {
