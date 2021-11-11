@@ -36,7 +36,7 @@ var fileMoved = false;
   const watcher = chokidar.watch(tempDownloadPath, {ignored: /\.csv$/g, persistent: true});
   watcher
     .on('add', function(filePath)  {
-      logger.debug('Download of file ' + filePath + ' has begun.');
+      logger.info('Download of file ' + filePath + ' has begun.');
     })
     //.on('change', function(filePath)  { logger.debug('File ' + filePath + ' has been changed.'); })
     .on('unlink', async function(filePath)  {
@@ -70,17 +70,17 @@ var fileMoved = false;
     // defaultViewport: null,
     args: ['--no-sandbox'], // necessary to work with puppeteer docker image
   });
-  logger.debug("Browser loaded.");
+  logger.info("Browser loaded.");
 
   const context = browser.defaultBrowserContext();
   context.overridePermissions(config.SF_URL, ["notifications"]);
 
   const page = await browser.newPage();
-  logger.debug("Blank page loaded.");
+  logger.info("Blank page loaded.");
 
   /* Go to the page and wait for it to load */
   await page.goto(config.SF_URL, { waitUntil: 'networkidle2' });
-  logger.debug("Salesforce initial auth page loaded.");
+  logger.info("Salesforce initial auth page loaded.");
 
   /* Click on the SSO button */
   await Promise.all([
@@ -88,7 +88,7 @@ var fileMoved = false;
     await page.click('#idp_section_buttons > button > span'),
     await page.keyboard.press('Enter'),
     waitForNetworkIdle(page, 20000, 0),
-    logger.debug("Navigating to SSO page."),
+    logger.info("Navigating to SSO page."),
   ]);
 
   /* Enter username/password */
@@ -99,7 +99,7 @@ var fileMoved = false;
     logger.info("Logged in to Salesforce. Please wait..."),
     await sleep(28000),
     waitForNetworkIdle(page, 2000, 0),
-    logger.debug("Salesforce report page loaded."),
+    logger.info("Salesforce report page loaded."),
   ]);
 
   /* Set download location */
@@ -117,7 +117,7 @@ var fileMoved = false;
     await sleep(5000);
 
     do {
-      logger.debug("Reloading page.");
+      logger.info("Reloading page.");
       await page.reload();
       logger.debug("Page reloaded.");
 
@@ -138,7 +138,7 @@ var fileMoved = false;
       logger.debug("Waiting for download to start...");
       await waitForDownload(config.DOWNLOAD_TIMEOUT);
 
-      logger.debug("Sleeping for " + config.REPORT_INTERVAL + "ms... Count=" + reportCount);
+      logger.info("Sleeping for " + config.REPORT_INTERVAL + "ms... Count=" + reportCount);
       await sleep (config.REPORT_INTERVAL);
     } while (!finished);
   } catch (err) {
