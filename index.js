@@ -17,8 +17,8 @@ logger.info("Starting up.");
 
 var sleepTime = Math.floor(config.REPORT_INTERVAL / 1000);
 var sleepTimeUnit = "seconds";
-if (sleepTime > 60 ) { sleepTime = Math.floor(sleepTime / 60); sleepTimeUnit = "minutes"; }
-if (sleepTime > 60 ) { sleepTime = Math.floor(sleepTime / 60); sleepTimeUnit = "hours"; }
+if (sleepTime > 119 ) { sleepTime = Math.floor(sleepTime / 60); sleepTimeUnit = "minutes"; }
+if (sleepTime > 119 ) { sleepTime = Math.floor(sleepTime / 60); sleepTimeUnit = "hours"; }
 
 const tempDownloadPath = `${config.DOWNLOAD_PATH}/${config.REPORT_TAG}`;
 
