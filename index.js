@@ -17,8 +17,8 @@ logger.info("Starting up.");
 
 var sleepTime = Math.floor(config.REPORT_INTERVAL / 1000);
 var sleepTimeUnit = "seconds";
-if (sleepTime > 119 ) { sleepTime = Math.floor(sleepTime / 60); sleepTimeUnit = "minutes"; }
-if (sleepTime > 119 ) { sleepTime = Math.floor(sleepTime / 60); sleepTimeUnit = "hours"; }
+if (sleepTime > 60 ) { sleepTime = Math.floor(sleepTime / 60); sleepTimeUnit = "minutes"; }
+if (sleepTime > 60 ) { sleepTime = Math.floor(sleepTime / 60); sleepTimeUnit = "hours"; }
 
 const tempDownloadPath = `${config.DOWNLOAD_PATH}/${config.REPORT_TAG}`;
 
@@ -102,10 +102,22 @@ var fileMoved = false;
     await page.type('#password', config.PASS),
     await page.keyboard.press('Enter'),
     logger.info("Logged in to Salesforce. Please wait..."),
-    await sleep(28000),
+    await sleep(10000),
     waitForNetworkIdle(page, 2000, 0),
-    logger.info("Salesforce report page loaded."),
+    logger.info("2FA page loaded."),
   ]);
+
+  /* Click on the Enter button for 2FA SmartPhonePush */
+  await Promise.all([
+    await sleep(10000),
+    await page.keyboard.press('Tab'),
+    await page.keyboard.press('Tab'),
+    await page.keyboard.press('Enter'),
+    waitForNetworkIdle(page, 20000, 0),
+    logger.info("Waiting for 2FA acceptance."),
+  ]);
+
+  logger.info("Report page loaded."),
 
   /* Set download location */
   await page._client.send('Page.setDownloadBehavior', {behavior: 'allow', downloadPath: tempDownloadPath});
