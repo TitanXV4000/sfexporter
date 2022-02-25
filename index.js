@@ -5,6 +5,7 @@ jwalker
 */
 var config = require('./config');
 var reportCount = 0;
+var refreshCount = -1;
 const puppeteer = require('puppeteer');
 const jwalkerLogger = require('tsanford-logger');
 const chokidar = require('chokidar');
@@ -104,17 +105,34 @@ var fileMoved = false;
     logger.info("Logged in to Salesforce. Please wait..."),
     await sleep(10000),
     waitForNetworkIdle(page, 2000, 0),
-    logger.info("2FA page loaded."),
+    logger.info("2FA selection page loaded."),
   ]);
 
-  /* Click on the Enter button for 2FA SmartPhonePush */
+  /* Select 2FA TOTP and click enter */
   await Promise.all([
-    await sleep(10000),
+    await sleep(5000),
     await page.keyboard.press('Tab'),
+    await page.keyboard.press('ArrowDown'),
     await page.keyboard.press('Tab'),
     await page.keyboard.press('Enter'),
+    waitForNetworkIdle(page, 2000, 0),
+    //logger.info("Waiting for 2FA acceptance."),
+    logger.info("2FA code page loaded"),
+  ]);
+
+  /* Read 2FA code */
+  var code2FAnum = await readFile(config.DOWNLOAD_PATH + "/totp.txt");
+  var code2FAarr = code2FAnum.toString().replace(/\r\n/g,'\n').split('\n');
+  var code2FA = code2FAarr[0];
+
+  /* Enter 2FA code and submit */
+  await Promise.all([
+    await sleep(5000),
+    await page.type('#nffc', code2FA),
+    await page.keyboard.press('Enter'),
+    logger.info("2FA code entered and submitted: " + code2FA),
     waitForNetworkIdle(page, 20000, 0),
-    logger.info("Waiting for 2FA acceptance."),
+    //logger.info("Waiting for 2FA acceptance."),
   ]);
 
   logger.info("Report page loaded."),
@@ -134,9 +152,13 @@ var fileMoved = false;
     await sleep(5000);
 
     do {
-      logger.info("Reloading page.");
-      await page.reload();
-      logger.debug("Page reloaded.");
+      refreshCount++;
+      if (refreshCount >= 1) {
+        logger.info("Reloading page. Count=" + refreshCount);
+        await page.reload();
+        refreshCount = 0;
+        logger.debug("Page reloaded. Count=" + refreshCount);
+      }
 
       // Change report type to csv
       await pressKey(page, 'Tab', 4);
@@ -159,8 +181,9 @@ var fileMoved = false;
       await sleep (config.REPORT_INTERVAL);
     } while (!finished);
   } catch (err) {
-    finished = true;
-    logger.error("Error caught during export procedure: " + err);
+    if (refreshCount >= 3) { finished = true; }
+    //finished = true;
+    logger.error("C=" + refreshCount + " F=" + finished + " Error caught during export procedure: " + err);
   } finally {
     try {
       if (browser !== null ) {
@@ -244,6 +267,13 @@ async function copyFile(oldname, newname) {
   }
 }
 
+async function readFile(path) {
+  try {
+    return fs.readFileSync(path);
+  } catch (e) {
+    logger.error("Error caught in readFile: " + e.toLocaleString());
+  }t
+}
 
 /* Use if 500ms timeout of 'networkidleX' is insufficient */
 function waitForNetworkIdle(page, timeout, maxInflightRequests = 0) {
