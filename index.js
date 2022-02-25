@@ -90,7 +90,7 @@ var fileMoved = false;
 
   /* Click on the SSO button */
   await Promise.all([
-    await sleep(10000),
+    await sleep(5000),
     await page.click('#idp_section_buttons > button > span'),
     await page.keyboard.press('Enter'),
     waitForNetworkIdle(page, 20000, 0),
@@ -103,7 +103,7 @@ var fileMoved = false;
     await page.type('#password', config.PASS),
     await page.keyboard.press('Enter'),
     logger.info("Logged in to Salesforce. Please wait..."),
-    await sleep(10000),
+    await sleep(5000),
     waitForNetworkIdle(page, 2000, 0),
     logger.info("2FA selection page loaded."),
   ]);
