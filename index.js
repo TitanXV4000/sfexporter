@@ -82,10 +82,12 @@ var fileMoved = false;
   context.overridePermissions(config.SF_URL, ["notifications"]);
 
   const page = await browser.newPage();
+  await page.setDefaultNavigationTimeout(60000);
   logger.info("Blank page loaded.");
 
   /* Go to the page and wait for it to load */
-  await page.goto(config.SF_URL, { waitUntil: 'networkidle2' });
+  //await page.goto(config.SF_URL, { waitUntil: 'networkidle2' });
+  await page.goto(config.SF_URL, { waitUntil: 'load' });
   logger.info("Salesforce initial auth page loaded.");
 
   /* Click on the SSO button */
