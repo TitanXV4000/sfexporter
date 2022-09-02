@@ -1,5 +1,6 @@
 FROM buildkite/puppeteer:5.2.1
 WORKDIR /usr/src/apps
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 4EB27DB2A3B88B8B
 RUN apt-get update
 RUN apt-get -y install git
 RUN apt-get -y install vim
