@@ -112,7 +112,7 @@ var fileMoved = false;
   /* Select 2FA TOTP and click enter */
   await Promise.all([
     await sleep(5000),
-    await page.keyboard.press('Tab'),
+    /* await page.keyboard.press('Tab'), */
     await page.keyboard.press('ArrowDown'),
     await page.keyboard.press('Tab'),
     await page.keyboard.press('Enter'),
